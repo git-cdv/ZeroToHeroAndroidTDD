@@ -2,7 +2,6 @@ package ru.easycode.zerotoheroandroidtdd
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -17,6 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var rootLayout : LinearLayout
     private lateinit var textView : TextView
+    private lateinit var removeButton : Button
 
     private var isHided: Boolean = false
     private var state: State = State.Initial
@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         textView = findViewById(R.id.titleTextView)
         val btnChange = findViewById<Button>(R.id.changeButton)
         val btnHide = findViewById<Button>(R.id.hideButton)
-        val btnRemove = findViewById<Button>(R.id.removeButton)
+        removeButton = findViewById(R.id.removeButton)
 
         btnChange.setOnClickListener {
             textView.text = "I am an Android Developer!"
@@ -38,9 +38,9 @@ class MainActivity : AppCompatActivity() {
             textView.isVisible = false
             isHided = true
         }
-        btnRemove.setOnClickListener {
+        removeButton.setOnClickListener {
             state = State.Removed
-            state.apply(rootLayout,textView)
+            state.removeViewAndDisableButton(rootLayout,textView,removeButton)
         }
     }
 
@@ -52,22 +52,23 @@ class MainActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         state = savedInstanceState.getSerializable(KEY_HIDE_STATE) as State
-        state.apply(rootLayout,textView)
+        state.removeViewAndDisableButton(rootLayout,textView,removeButton)
     }
 
 }
 
 interface State : Serializable {
 
-    fun apply (linearLayout : LinearLayout, textView : TextView)
+    fun removeViewAndDisableButton (linearLayout : LinearLayout, textView : TextView, button: Button)
 
     object Initial : State {
-        override fun apply(linearLayout: LinearLayout, textView: TextView)  = Unit
+        override fun removeViewAndDisableButton(linearLayout: LinearLayout, textView: TextView, button: Button)  = Unit
     }
 
     object Removed : State {
-        override fun apply(linearLayout: LinearLayout, textView: TextView){
+        override fun removeViewAndDisableButton(linearLayout: LinearLayout, textView: TextView, button: Button){
             linearLayout.removeView(textView)
+            button.isEnabled = false
         }
     }
 }
